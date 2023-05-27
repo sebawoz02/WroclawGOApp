@@ -1,4 +1,4 @@
-package com.example.wroclawgoapp
+package com.example.wroclawgoapp.entertainment
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.wroclawgoapp.MainActivity
 
 @Composable
 fun EntertainmentDetails(event: MutableState<Event?>, modifier: Modifier = Modifier){

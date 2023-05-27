@@ -1,4 +1,4 @@
-package com.example.wroclawgoapp
+package com.example.wroclawgoapp.entertainment
 
 import androidx.room.Dao
 import androidx.room.Delete
