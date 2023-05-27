@@ -1,9 +1,7 @@
 package com.example.wroclawgoapp
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class BottomNavigationBar(
@@ -14,18 +12,18 @@ sealed class BottomNavigationBar(
     object Entertainment : BottomNavigationBar(
         route = "entertainment",
         title = "Entertainment",
-        icon = Icons.Default.Search
+        icon = Icons.Default.Event
     )
 
     object Transport : BottomNavigationBar(
-        route = "transport",
-        title = "Transport",
-        icon = Icons.Default.Place
+        route = "map",
+        title = "Map",
+        icon = Icons.Default.Map
     )
 
     object Favorite : BottomNavigationBar(
-        route = "favorite",
-        title = "Favorite",
-        icon = Icons.Default.Favorite
+        route = "transport",
+        title = "Transport",
+        icon = Icons.Default.Traffic
     )
 }
