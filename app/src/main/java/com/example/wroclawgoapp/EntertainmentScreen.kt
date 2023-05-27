@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -25,8 +24,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.wroclawgoapp.ui.theme.WroclawGOAppTheme
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.*
 import java.time.format.DateTimeFormatter
 
 
@@ -34,45 +34,61 @@ import java.time.format.DateTimeFormatter
 fun EntertainmentScreen(){
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Blue),
+            .fillMaxWidth(1f)
+            .fillMaxHeight(1f),
         contentAlignment = Alignment.Center
     ){
-        var text = remember { mutableStateOf("") }
-        var active = remember { mutableStateOf(false) }
+        var searchBarText = remember { mutableStateOf("") }
+        var searchBarActive = remember { mutableStateOf(false) }
         var history = remember {
             mutableSetOf<String>()
         }
-
-
+        var eventActive = remember {
+            mutableStateOf<Event?>(null)
+        }
         var items by remember {
             mutableStateOf<List<Event>>(emptyList())
         }
-        items = getResults(text.value)
 
-        Scaffold(
-            modifier = Modifier,
-            content = {
-                if(items.isNotEmpty())
-                    Content(items)
-                else
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ){
-                        Text(text = "No results for ${text.value}...", fontSize = 22.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-                    }
-            },
-            topBar = {
-                MySearchBar(history = history, text = text, active = active)
-            }
-        )
+        items = MainActivity.dao.getEventsFromDb(searchBarText.value)
+
+        if(items.size > 0){
+            println("item[0]: ${items[0].toString()}")
+        }
+
+
+        if(eventActive.value == null) {
+            Scaffold(
+                modifier = Modifier,
+                content = {
+                    if (items.isNotEmpty())
+                        Content(items, activeEvent = eventActive)
+                    else
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No results for ${searchBarText.value}...",
+                                fontSize = 22.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                },
+                topBar = {
+                    MySearchBar(history = history, text = searchBarText, active = searchBarActive)
+                }
+            )
+        } else {
+            EntertainmentDetails(event = eventActive, modifier = Modifier.padding(bottom = 60.dp))
+        }
     }
 }
 
-fun getResults(searchString: String): List<Event>{
+suspend fun getResults(searchString: String): List<Event>{
     // TODO: Fetch results from backend
-    var list = mutableListOf<Event>()
+    val list = mutableListOf<Event>()
 
     for(ev in debugDB){
         if(list.size >= 20)
@@ -80,6 +96,8 @@ fun getResults(searchString: String): List<Event>{
         if(ev.name.contains(searchString, true))
             list.add(ev)
     }
+
+//    MainActivity.dao.getEventsFromDb(searchString).collectAsState(initial = emptyList<Event>())
 
     return list.toList()
 }
@@ -108,14 +126,14 @@ fun MySearchBar(history: MutableSet<String>, text: MutableState<String>, active:
         history.forEach{
             Row(modifier = Modifier.padding(all = 14.dp)) {
                 androidx.compose.material3.Icon(imageVector = Icons.Default.History, contentDescription = "History Icon")
-                Text(text = it)
+                Text(text = it, modifier = Modifier.clickable { text.value = it })
             }
         }
     }
 }
 
 @Composable
-fun Content(eventList: List<Event>){
+fun Content(eventList: List<Event>, activeEvent: MutableState<Event?>){
     LazyVerticalGrid(
         modifier = Modifier
             .fillMaxSize()
@@ -123,21 +141,21 @@ fun Content(eventList: List<Event>){
         columns = GridCells.Fixed(2),
         content = {
             items(eventList){
-                ListItem(event = it)
+                ListItem(event = it, modifier = Modifier.clickable {
+                    activeEvent.value = it
+                })
             }
         })
 }
 
 @Composable
-fun ListItem(event: Event){
+fun ListItem(event: Event, modifier: Modifier){
     Box(
         modifier = Modifier
             .fillMaxWidth(1f)
             .height(200.dp)
             .background(Color.White)
-            .clickable {
-                println("[CLICKED]")
-            }
+            .then(modifier)
     ){
         Column(
             modifier = Modifier
@@ -149,7 +167,7 @@ fun ListItem(event: Event){
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             AsyncImage(
-                model = event.img.url,
+                model = event.img,
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .fillMaxHeight(0.65f)
@@ -159,7 +177,7 @@ fun ListItem(event: Event){
                         shape = RoundedCornerShape(5.dp)
                     )
                     .clip(RoundedCornerShape(5.dp)),
-                contentDescription = event.img.description,
+                contentDescription = event.imgDesc,
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.Center,
                 error = painterResource(id = R.drawable.imagenotfound)
@@ -179,8 +197,8 @@ fun ListItem(event: Event){
                     .padding(horizontal = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
-                Text(text = event.location.name)
-                Text(text = event.time.startDate.format(DateTimeFormatter.ISO_DATE))
+                Text(text = event.location)
+                Text(text = event.date.toString())
             }
         }
     }
@@ -191,6 +209,6 @@ fun ListItem(event: Event){
 fun EntertainmentScreenPreview() {
     WroclawGOAppTheme {
 //        EntertainmentScreen()
-        ListItem(Event())
+//        ListItem(Event())
     }
 }

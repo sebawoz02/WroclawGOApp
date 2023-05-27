@@ -1,15 +1,18 @@
 package com.example.wroclawgoapp
 
-import java.net.URL
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverter
+import org.jetbrains.annotations.NotNull
+import java.sql.Date
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.Date
-import java.util.UUID
 
 data class Content(
     val longName: String = "Wrocław Wydarzenie",
     val url: String = "",
+    val description: Array<String> = arrayOf()
 )
 
 data class TimeData(
@@ -25,50 +28,84 @@ data class ImgData(
     val description: String = "Image of Wrocław"
 )
 
-data class Location(
-    val name: String = "Wrocław",
+@Entity
+data class Event(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int? = 0,
+    val name: String = "Event",
+    val location: String = "Wrocław",
+    val date: Date = Date.valueOf("2022-11-09"),
+    val img: String = "https://www.wroclaw.pl/beta2/files/news/41802/main/post-wroclaw_1.jpg",
+    val imgDesc: String = "Image of Wrocław"
+)
+
+@Entity
+data class Coordinates(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int? = 0,
+    val event_id: Int = 0,
     val longitude: Double = 0.0,
     val latitude: Double = 0.0
 )
 
-data class Event(
-    val id: UUID = UUID.randomUUID(),
-    val name: String = "Event",
-    val content: Content = Content(),
-    val time: TimeData = TimeData(),
-    val img: ImgData = ImgData(),
-    val location: Location = Location()
+@Entity
+data class Details(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int? = 0,
+    val event_id: Int = 0,
+    val fullName: String = "Wydarzenie we Wrocławiu",
+    val time: String = "12:00"
 )
 
-val TEST_UUID: UUID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000")
+@Entity
+data class Description(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int? = 0,
+    val event_id: Int = 0,
+    val content: String = ""
+)
+
+class DateConverter {
+    @TypeConverter
+    fun fromTimestamp(value: Long?): Date? {
+        return value?.let { Date(it) }
+    }
+
+    @TypeConverter
+    fun dateToTimestamp(date: Date?): Long? {
+        return date?.time
+    }
+}
+
+const val TEST_UUID: Int = 666
 
 val debugDB = listOf(
-    Event(),Event(),Event(),Event(),
-    Event(),Event(),Event(),Event(),
-    Event(),Event(),Event(),Event(),
-    Event(),Event(),Event(),Event(),
-    Event(name="Wydarzenie-1"),Event(name="Wydarzenie-1"),Event(name="Wydarzenie-1"),Event(name="Wydarzenie-1"),
-    Event(name="Wydarzenie-1"),Event(name="Wydarzenie-1"),Event(name="Wydarzenie-1"),Event(name="Wydarzenie-1"),
-    Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),
-    Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),
-    Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),
-    Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),
-    Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),
-    Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),Event(name="Wydarzenie-2"),
-    Event(name="Wydarzenie-3"),Event(name="Wydarzenie-3"),Event(name="Wydarzenie-3"),Event(name="Wydarzenie-3"),
-    Event(name="Wydarzenie-34"),Event(name="Wydarzenie-34"),Event(name="Wydarzenie-3"),Event(name="Wydarzenie-345"),
+    Event(),
+    Event(name="Wydarzenie-1"),
+    Event(name="Wydarzenie-2"),
+    Event(name="Wydarzenie-2"),
+    Event(name="Wydarzenie-3"),
+    Event(name="Wydarzenie-34"),
     Event(
         name="Jarmark Świętojański...",
         id = TEST_UUID,
-        img = ImgData(url = "https://static.wikia.nocookie.net/amogus/images/c/c2/Le_monk.png/revision/latest?cb=20210830232252"),
-        time = TimeData(
-            startDate = LocalDate.of(2023,6,19),
-            endDate = LocalDate.of(2023, 6, 27)
-        ),
-        content = Content(
-            longName = "Jarmark Świętojański 2023",
-            url = "https://www.wroclaw.pl/go/wydarzenia/rozrywka/1263446-jarmark-swietojanski?termin=1258248"
-        )
+        img = "https://i.ytimg.com/vi/3VC6lRgq7hc/sddefault.jpg",
+        date = Date.valueOf("2023-06-19")
+//        time = TimeData(
+//            startDate = LocalDate.of(2023,6,19),
+//            endDate = LocalDate.of(2023, 6, 27)
+//        ),
+//        content = Content(
+//            longName = "Jarmark Świętojański 2023",
+//            url = "https://www.wroclaw.pl/go/wydarzenia/rozrywka/1263446-jarmark-swietojanski?termin=1258248",
+//            description = arrayOf(
+//                "Jarmark Świętojański 2023 odbędzie się w terminie od 19 maja do 27 czerwca. Stoiska otwarte będą od godz. 10.00 do 21.00, sprzedaż artykułów będzie prowadzone również online na pojawi.pl",
+//                "Jarmark Świętojański odbędzie się na wrocławskim Rynku – w obszarze wokół Pręgierza, ulicy Oławskiej od ulicy Szewskiej do Rynku i Świdnickiej od przejścia podziemnego do Rynku.",
+//                "Sprzedaż na Jarmarku Świętojańskim odbywać się będzie wyłącznie z domków drewnianych. Nie ma możliwości prowadzenia sprzedaży z namiotów, foodtrucków lub ustawiania indywidualnych ekspozycji i prowadzenia sprzedaży poza domkiem.",
+//                "Artykuły przemysłowe, rękodzieło i rzemiosło – artystyczne wyroby własne, dekoracje i ozdoby, ceramika, biżuteria, mydła i kosmetyki naturalne, ręcznie szyte zabawki z naturalnych materiałów, wyroby regionalne (w tym góralskie), kubki pamiątkowe z nadrukiem, pamiątki, wyroby ze szkła, świece, metaloplastyka, galanteria, torby, odzież artystyczna.",
+//                "Artykuły spożywcze – regionalne sery i wędliny, pieczywo i wypieki, konfitury, miody, nalewki, wyroby czekoladowe i słodycze, zioła i przyprawy, kawy i herbaty, produkty naturalne i wegańskie."
+//                )
+//        )
     )
 )
 

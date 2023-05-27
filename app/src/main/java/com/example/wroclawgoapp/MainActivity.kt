@@ -11,11 +11,29 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.wroclawgoapp.ui.theme.WroclawGOAppTheme
 
 
+@Database(entities = [Event::class, Details::class, Description::class, Coordinates::class], version = 1)
+@TypeConverters(DateConverter::class)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun eventDao(): EventDao
+}
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "events-10"
+        ).createFromAsset("database.db").allowMainThreadQueries().build()
+        dao = db.eventDao();
+        dao.getEventsFromDb("");
+
         super.onCreate(savedInstanceState)
         setContent {
             WroclawGOAppTheme {
@@ -28,6 +46,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        public lateinit var dao: EventDao
     }
 }
 
