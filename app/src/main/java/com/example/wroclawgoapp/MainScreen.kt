@@ -10,18 +10,15 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.wroclawgoapp.timetable.Route
-import com.example.wroclawgoapp.timetable.RouteViewModel
-
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun MainScreen(routeViewModel: RouteViewModel) {
+fun MainScreen() {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = { BottomBar(navController = navController)}
     ) {
-        BottomNavGraph(navController = navController, routeViewModel)
+        BottomNavGraph(navController = navController)
     }
     
 }

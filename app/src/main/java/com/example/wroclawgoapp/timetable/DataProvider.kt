@@ -3,13 +3,10 @@ package com.example.wroclawgoapp.timetable
 import android.content.Context
 import java.io.BufferedReader
 
-class DataProvider(fileName: String, context: Context) {
-    private val fileContent = context.assets.open(fileName).bufferedReader().use(BufferedReader::readText).replace("\"","")
-    val jsonArray = setJSONArray()
+class DataProvider(val context: Context) {
 
-
-
-    private fun setJSONArray(): List<String>{
+    fun getJSONArray(fileName: String): List<String>{
+        val fileContent = context.assets.open(fileName).bufferedReader().use(BufferedReader::readText).replace("\"","")
         val arr = mutableListOf<String>()
         val lines = fileContent.split("\n")
 

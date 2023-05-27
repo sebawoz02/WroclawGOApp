@@ -17,9 +17,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.wroclawgoapp.entertainment.*
-import com.example.wroclawgoapp.timetable.DataProvider
-import com.example.wroclawgoapp.timetable.Route
-import com.example.wroclawgoapp.timetable.RouteViewModel
+import com.example.wroclawgoapp.timetable.*
 import com.example.wroclawgoapp.ui.theme.WroclawGOAppTheme
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -42,19 +40,21 @@ class MainActivity : ComponentActivity() {
         dao = db.eventDao();
         dao.getEventsFromDb("");
 
-        val ctx = applicationContext
-        val dataProvider = DataProvider("routes.txt",ctx)
-        val jsonArray = dataProvider.jsonArray
+        val dataProvider = DataProvider(applicationContext)
+        val routesJsonArray = dataProvider.getJSONArray("routes.txt")
+        val stopsJsonArray = dataProvider.getJSONArray("stops.txt")
 
         val moshi: Moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
-        val adapter = moshi.adapter(Route::class.java)
+        val routeAdapter = moshi.adapter(Route::class.java)
+        val stopAdapter = moshi.adapter(Stop::class.java)
 
         val routes = mutableListOf<Route>()
-        for(obj in jsonArray){
-            routes.add( adapter.fromJson(obj)!! )
-        }
+        for(obj in routesJsonArray) routes.add( routeAdapter.fromJson(obj)!! )
 
-        val viewModel = RouteViewModel(routes)
+        val stops = mutableListOf<Stop>()
+        for(obj in stopsJsonArray) stops.add ( stopAdapter.fromJson(obj)!! )
+
+        timeTableViewModel = TimeTableViewModel(routes,stops)
 
         super.onCreate(savedInstanceState)
         setContent {
@@ -64,14 +64,15 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    MainScreen(routeViewModel = viewModel)
+                    MainScreen()
                 }
             }
         }
     }
 
     companion object {
-        public lateinit var dao: EventDao
+        lateinit var dao: EventDao
+        lateinit var timeTableViewModel: TimeTableViewModel
     }
 }
 
