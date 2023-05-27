@@ -42,19 +42,14 @@ class MainActivity : ComponentActivity() {
 
         val dataProvider = DataProvider(applicationContext)
         val routesJsonArray = dataProvider.getJSONArray("routes.txt")
-        val stopsJsonArray = dataProvider.getJSONArray("stops.txt")
 
         val moshi: Moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
         val routeAdapter = moshi.adapter(Route::class.java)
-        val stopAdapter = moshi.adapter(Stop::class.java)
 
         val routes = mutableListOf<Route>()
         for(obj in routesJsonArray) routes.add( routeAdapter.fromJson(obj)!! )
 
-        val stops = mutableListOf<Stop>()
-        for(obj in stopsJsonArray) stops.add ( stopAdapter.fromJson(obj)!! )
-
-        timeTableViewModel = TimeTableViewModel(routes,stops)
+        timeTableViewModel = TimeTableViewModel(routes)
 
         super.onCreate(savedInstanceState)
         setContent {

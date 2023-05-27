@@ -5,16 +5,18 @@ import java.io.BufferedReader
 
 class DataProvider(val context: Context) {
 
-    fun getJSONArray(fileName: String): List<String>{
-        val fileContent = context.assets.open(fileName).bufferedReader().use(BufferedReader::readText).replace("\"","")
+    fun getJSONArray(fileName: String): List<String> {
+        val fileContent =
+            context.assets.open(fileName).bufferedReader().use(BufferedReader::readText)
+                .replace("\"", "")
         val arr = mutableListOf<String>()
         val lines = fileContent.split("\n")
 
         val tags = lines[0].split(",")
-        val routes = lines.subList(1,lines.size)
+        val routes = lines.subList(1, lines.size)
 
-        for(route in routes){
-            arr.add(toJSON(route,tags))
+        for (route in routes) {
+            arr.add(toJSON(route, tags))
         }
 
         return arr
