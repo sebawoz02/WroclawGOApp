@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
         val db = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java,
-            "events-10"
+            "events-40"
         ).createFromAsset("database.db").allowMainThreadQueries().build()
         dao = db.eventDao();
         dao.getEventsFromDb("");
